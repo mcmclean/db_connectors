@@ -53,8 +53,11 @@ class DBEngine(object):
 	def __init__(self, flavor, conn):
 		self.db_flavor = flavor
 		self.connection = self.db_flavor + '://' + conn.params_string
+		self.engine = None
+
 	def construct_engine(self):
 		self.engine = create_engine(self.connection, paramstyle = 'format')
+
 	def shut_down(self):
 		self.engine.dispose()
 

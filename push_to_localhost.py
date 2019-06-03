@@ -6,10 +6,10 @@ from pathlib import Path
 from sqlalchemy import create_engine
 import os
 import logging
-from db_engine import give_conn_info, execute_raw_sql, engine
+from db_engine import raw_sql_conn, engine
 
-@give_conn_info
-def fast_copy(conn_info, filename = 'ethanol fuel prices.csv', tablename = 'fuel_prices'):
+
+def fast_copy(filename = 'ethanol fuel prices.csv', tablename = 'fuel_prices'):
 	csv_file_path = Path.cwd().parent / filename
 	with open(csv_file_path, 'r') as f:    
 		conn = psycopg2.connect("host=localhost dbname=postgres user=postgres password=password")
@@ -25,16 +25,16 @@ def fast_copy(conn_info, filename = 'ethanol fuel prices.csv', tablename = 'fuel
 	print("Data load complete")
 
 
-@execute_raw_sql
+@raw_sql_conn
 def make_table(raw_conn, tablename = 'fuel_prices'): # invoke Mohsen's tablename style thing
 	sql_drop_table_cmd = "DROP TABLE IF EXISTS public.master_{};".format(tablename)
 	sql_create_table_cmd = """
-	    CREATE TABLE public.master_{} (
-	        \"Month\" text NULL,
-	        \"2017\" double precision NULL,
-	        \"2018\" double precision NULL,
-	        \"2019\" double precision NULL
-	    );
+		CREATE TABLE public.master_{} (
+			\"Month\" text NULL,
+			\"2017\" double precision NULL,
+			\"2018\" double precision NULL,
+			\"2019\" double precision NULL
+		);
 	""".format(tablename)
 	raw_conn.execute(sql_drop_table_cmd)
 	raw_conn.execute(sql_create_table_cmd)
@@ -64,6 +64,7 @@ def full_table_import():
 	learn to automatically generate platform jsons from input files
 	'''
 
+
 def guess_file_types():
 	csv_file_path = Path.cwd().parent / 'ethanol fuel prices.csv'
 	df = pd.read_csv(csv_file_path, nrows = 10)
@@ -78,6 +79,7 @@ def write_output(eng, frame, tablename = 'forecast_output'):
 def read_table(eng, table = 'books'):
 	df = pd.read_sql('select * from public.{}'.format(table), eng)
 	print(df.head())
+
 
 if __name__ == "__main__":
 	# make_table()
